@@ -1,6 +1,8 @@
 #ifndef INVADER_H__
 #define INVADER_H__
 
+#include <SDL.h>
+
 //enumeration can create multiple data types
 //Invade can be either type1 type2 or type3
 
@@ -23,6 +25,10 @@ typedef struct
   enum InvaderType type;
 }Invader;
 
+void initializeInvaders(Invader invaders[ROWS][COLS], int _width, int _height);
 
+void updateInvaders(Invader invaders[ROWS][COLS]);
+
+void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex,Invader invaders[ROWS][COLS]);
 
 #endif
