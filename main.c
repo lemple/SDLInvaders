@@ -6,8 +6,6 @@
 #include "Invader.h"
 #include "Defender.h"
 
-
-
 // include the map for the maze.
 // the width of the screen taking into account the maze and block
 #define WIDTH 800
@@ -94,11 +92,7 @@ int main()
         case SDLK_a : defender.position.x--; break;
 
         case SDLK_d : defender.position.x++; break;
-
        }
-
-
-
     }
   }
   //if more textures then more textures need to be added
