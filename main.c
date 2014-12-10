@@ -3,21 +3,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Invader.h"
+//move defender by sprite width
+//create new function for the defneder use switch statement for keypress
+
+
 // include the map for the maze.
 // the width of the screen taking into account the maze and block
 #define WIDTH 800
 // the height of the screen taking into account the maze and block
 #define HEIGHT 600
 // an enumeration for direction to move USE more enums!
-enum DIRECTION{UP,DOWN,LEFT,RIGHT,NONE};
+enum DIRECTION{LEFT,RIGHT,NONE};
 
 void initializeInvaders(Invader invaders[ROWS][COLS]);
 void updateInvaders(Invader invaders[ROWS][COLS]);
 
 void drawInvaders(SDL_Renderer *ren,SDL_Texture *tex,Invader invaders[ROWS][COLS]);
+void drawDefender(SDL_Renderer *ren, SDL_Rect defender);
+void defenderMovement();
 
 int main()
 {
+  SDL_Rect defender;
+  defender.h = SPRITEHEIGHT;
+  defender.w = 60;
+  defender.x = (WIDTH-defender.w)/2;
+  defender.y = HEIGHT-defender.h;
+
   Invader invaders[ROWS][COLS];
   initializeInvaders(invaders);
   // initialise SDL and check that it worked otherwise exit
@@ -46,6 +58,7 @@ int main()
     printf("%s\n",SDL_GetError() );
     return EXIT_FAILURE;
   }
+
   // this will set the background colour to white.
   // however we will overdraw all of this so only for reference
   SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
@@ -69,7 +82,6 @@ int main()
   SDL_FreeSurface(image);
 
 
-
   int quit=0;
   // now we are going to loop forever, process the keys then draw
 
@@ -90,15 +102,25 @@ int main()
         // if we have an escape quit
         case SDLK_ESCAPE : quit=1; break;
 
+        case SDLK_a : defender.x--; break;
+
+        case SDLK_d : defender.x++; break;
+
+
        }
+
+
+
     }
   }
-
+  //if more textures then more textures need to be added
   // now we clear the screen (will use the clear colour set previously)
   SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
   SDL_RenderClear(ren);
   updateInvaders(invaders);
   drawInvaders(ren,tex,invaders);
+  drawDefender(ren, defender);
+
   // Up until now everything was drawn behind the scenes.
   // This will show the new, red contents of the window.
   SDL_RenderPresent(ren);
@@ -117,6 +139,7 @@ void initializeInvaders(Invader invaders[ROWS][COLS])
   pos.h=SPRITEHEIGHT;
   int ypos=GAP;
 
+  //configures data structure to start
   for(int r=0; r<ROWS; ++r)
   {
     int xpos=GAP;
@@ -140,7 +163,7 @@ void initializeInvaders(Invader invaders[ROWS][COLS])
   }
 }
 
-
+//loads in textures for multiple may need array
 void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][COLS])
 {
   SDL_Rect SrcR;
@@ -152,13 +175,16 @@ void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][CO
   {
     for(int c=0; c<COLS; ++c)
     {
+      //more likely to switch the invader type to input diffrent texture
       switch(invaders[r][c].type)
       {
+      //sets the color of the diffrent sprites can import own sprite for diffrent image
       case TYPE1 : SDL_SetRenderDrawColor(ren, 255, 0, 0, 255); break;
       case TYPE2 : SDL_SetRenderDrawColor(ren, 0, 255, 0, 255); break;
       case TYPE3 : SDL_SetRenderDrawColor(ren, 0, 0, 255, 255); break;
       }
       SDL_RenderFillRect(ren,&invaders[r][c].pos);
+      //copy 1 texture of someszie to another position
       SDL_RenderCopy(ren, tex,&SrcR,&invaders[r][c].pos);
 
 
@@ -171,12 +197,15 @@ void updateInvaders(Invader invaders[ROWS][COLS])
   enum DIR{FWD,BWD};
   static int DIRECTION=FWD;
   int yinc=0;
+  //so invaders can change direction when they hit the end of the screen
   if(invaders[0][COLS].pos.x>=(WIDTH-SPRITEWIDTH)-(COLS*(SPRITEWIDTH+GAP)))
   {
     DIRECTION=BWD;
     yinc=GAP;
 
   }
+  //for unit detection you need to alter the direction change when a colum is killed
+  //need to wrtie funciton for which row is active
   else if(invaders[0][0].pos.x<=SPRITEWIDTH)
   {
     DIRECTION=FWD;
@@ -197,3 +226,24 @@ void updateInvaders(Invader invaders[ROWS][COLS])
     }
   }
 }
+
+void drawDefender(SDL_Renderer *ren, SDL_Rect defender)
+{
+
+
+  SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
+  SDL_RenderFillRect(ren,&defender);
+
+
+
+}
+
+void defenderMovement()
+{
+
+}
+
+
+
+
+
