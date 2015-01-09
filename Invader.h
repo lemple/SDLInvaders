@@ -21,6 +21,8 @@ typedef struct
   int frame;
   //type1 type2 type3 invader
   enum InvaderType type;
+
+  int isFiring;
 }Invader;
 
 
