@@ -13,7 +13,7 @@
 #define WIDTH 800
 // the height of the screen taking into account the maze and block
 #define HEIGHT 600
-
+#define ANIMATIONLENGTH 50
 
 /* an enumeration for direction to move USE more enums!
 #define BOOL char
@@ -213,6 +213,10 @@ void initializeInvaders(Invader invaders[ROWS][COLS])
 //loads in textures for multiple may need array
 void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][COLS])
 {
+  static int frameTime = 0;
+  //static int invaderDead = 0;
+  static int rowCount = 0;
+
     /*
      Retrives images fomr the sprite sheet
      and places them dependent on the row/coloum
@@ -236,20 +240,52 @@ void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][CO
   SrcRT3.y=0;
   SrcRT3.w=100;
   SrcRT3.h=80;
-
-
+//incremeting the frame time so its equal to ANIMATIONLENGTH
+  frameTime++;
   for(int r=0; r<ROWS; ++r)
   {
     for(int c=0; c<COLS; ++c)
     {
+       //Provides a half second delay inbetween sprite animations
+      if(frameTime == ANIMATIONLENGTH)
+      {
+        //assigns the invaders rows and colums to diffrent animations
+        //and allows them to be sotred on either frame 0 or 1
+        invaders[r][c].frame = (invaders[r][c].frame == 0 ? 1 : 0);
+        rowCount++;
+        //checks every invader on the screen then sets the value to 0 to restart
+        if (rowCount == 55)
+        {
+          frameTime = 0;
+          rowCount = 0;
+        }
+      }
+      //runs the animaton from the spritesheet if frame 0
+      if(invaders[r][c].frame == 0)
+      {
+        SrcRT1.x=0;
+        SrcRT2.x=0;
+        SrcRT3.x=0;
+      }
+      //runs animation for frame 1
+      else
+      {
+        SrcRT1.x=90;
+        SrcRT2.x=0;
+        SrcRT3.x=185;
+      }
       if(invaders[r][c].active == 1)
       {
+
+
+
+
         switch(invaders[r][c].type)
         {
         //sets the color of the diffrent sprites can import own sprite for diffrent image
-        case TYPE1 : SDL_RenderCopy(ren, tex, &SrcRT1, &invaders[r][c].pos); break;
+        case TYPE1 : SDL_RenderCopy(ren, tex, &SrcRT3, &invaders[r][c].pos); break;
         case TYPE2 : SDL_RenderCopy(ren, tex, &SrcRT2, &invaders[r][c].pos); break;
-        case TYPE3 : SDL_RenderCopy(ren, tex, &SrcRT3, &invaders[r][c].pos); break;
+        case TYPE3 : SDL_RenderCopy(ren, tex, &SrcRT1, &invaders[r][c].pos); break;
         }
       }
       //more likely to switch the invader type to input diffrent texture
@@ -269,10 +305,11 @@ void updateInvaders(Invader invaders[ROWS][COLS])
   static int DIRECTION=FWD;
   int yinc=0;
   //activecolum left
-  int activeCL = 0;
+  static int activeCL = 0;
   //active colum right
-  int activeCR = 0;
-  int halt;
+  static int activeCR = COLS-1;
+  int halt = 0;
+
 
   for(int c = COLS-1; c >= 0; c--)
   {
@@ -291,10 +328,27 @@ void updateInvaders(Invader invaders[ROWS][COLS])
       }
   }
 halt = 0;
+
+for(int r = 0; r < ROWS; r++)
+{
+  for(int c =  0; c < COLS; c++)
+  {
+    if(invaders[r][c].active)
+    {
+      activeCL = c;
+      halt = 1;
+      break;
+    }
+  }
+  if(halt)
+  {
+    break;
+  }
+}
   //so invaders can change direction when they hit the end of the screen
   if(invaders[0][activeCR].pos.x>=WIDTH-SPRITEWIDTH)//(WIDTH-SPRITEWIDTH)-(COLS*(SPRITEWIDTH+GAP)))
   {
-       printf("%d\n", activeCR);
+      // printf("%d\n", activeCR);
     DIRECTION=BWD;
     yinc=GAP;
 
@@ -305,7 +359,6 @@ halt = 0;
   {
     DIRECTION=FWD;
     yinc=GAP;
-
   }
 
   for(int r=0; r<ROWS; ++r)
@@ -313,9 +366,9 @@ halt = 0;
     for(int c=0; c<COLS; ++c)
     {
       if(DIRECTION==FWD)
-        invaders[r][c].pos.x+=1;
+        invaders[r][c].pos.x+=5/2;
       else
-        invaders[r][c].pos.x-=1;
+        invaders[r][c].pos.x-=5/2;
       invaders[r][c].pos.y+=yinc;
 
     }
