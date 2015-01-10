@@ -28,6 +28,7 @@ enum DIRECTION{LEFT,RIGHT,NONE};
 void initializePlayer(Defender* player);
 void initializeInvaders(Invader invaders[ROWS][COLS]);
 void updateInvaders(Invader invaders[ROWS][COLS]);
+void InvaderDestoryAnimation(SDL_Renderer *ren, SDL_Texture *tex, SDL_Rect destroy, Invader invaders[ROWS][COLS]);
 
 void ProjectileShot(SDL_Renderer *ren, SDL_Texture *tex, SDL_Rect *projectile, Defender* defender);
 
@@ -53,6 +54,10 @@ int main()
   projectile.x = WIDTH/2 - projectile.w/2;
   projectile.h = 20;
   projectile.y = HEIGHT-40;
+
+  SDL_Rect destroy;
+  destroy.w=SPRITEWIDTH;
+  destroy.h=SPRITEHEIGHT;
 
 
 
@@ -151,6 +156,7 @@ int main()
 
   updateInvaders(invaders);
   drawInvaders(ren,tex,invaders);
+  InvaderDestoryAnimation(ren, tex, destroy, invaders);
 
   drawDefender(ren, defender.pos, tex);
   defenderMovement(&(defender.pos));
@@ -168,7 +174,6 @@ int main()
 
 void initializePlayer(Defender* player)
 {
-
   player->pos.h = SPRITEHEIGHT;
   player->pos.w = 60;
   player->pos.x = (WIDTH-player->pos.w)/2;
@@ -193,6 +198,7 @@ void initializeInvaders(Invader invaders[ROWS][COLS])
       pos.x=xpos+SPRITEWIDTH;
       pos.y=ypos+SPRITEHEIGHT;
       xpos+=(GAP+SPRITEWIDTH);
+      invaders[r][c].kill = 0;
       invaders[r][c].pos = pos;
       invaders[r][c].active = 1;
       invaders[r][c].isFiring = 0;
@@ -222,7 +228,7 @@ void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][CO
      and places them dependent on the row/coloum
      of the invaders
      */
-
+//Row texture 1
   SDL_Rect SrcRT1;
   SrcRT1.x=0;
   SrcRT1.y=0;
@@ -230,8 +236,8 @@ void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][CO
   SrcRT1.h=80;
 
   SDL_Rect SrcRT2;
-  SrcRT2.x=90;
-  SrcRT2.y=0;
+  SrcRT2.x=0;
+  SrcRT2.y=90;
   SrcRT2.w=100;
   SrcRT2.h=80;
 
@@ -265,21 +271,17 @@ void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][CO
       {
         SrcRT1.x=0;
         SrcRT2.x=0;
-        SrcRT3.x=0;
+        SrcRT3.x=185;
       }
       //runs animation for frame 1
       else
       {
         SrcRT1.x=90;
-        SrcRT2.x=0;
-        SrcRT3.x=185;
+        SrcRT2.x=95;
+        SrcRT3.x=270;
       }
       if(invaders[r][c].active == 1)
       {
-
-
-
-
         switch(invaders[r][c].type)
         {
         //sets the color of the diffrent sprites can import own sprite for diffrent image
@@ -294,6 +296,8 @@ void drawInvaders(SDL_Renderer *ren, SDL_Texture *tex, Invader invaders[ROWS][CO
       //copy 1 texture of someszie to another position
       SDL_RenderCopy(ren, tex,&SrcRT1,&invaders[r][c].pos);
      */
+
+
 
     }
   }
@@ -477,12 +481,102 @@ void Collision(Invader invaders[ROWS][COLS], SDL_Rect *projectile, Defender* def
       if(SDL_HasIntersection(&invaders[r][c].pos, projectile) && invaders[r][c].active)
       {
         invaders[r][c].active = 0;
+        invaders[r][c].kill = 1;
         defender->isFiring = 0;
         projectile->y = HEIGHT-40;
+
       }
     }
   }
 }
+
+void InvaderDestoryAnimation(SDL_Renderer *ren, SDL_Texture *tex, SDL_Rect destroy, Invader invaders[ROWS][COLS])
+{
+
+    //this is a timer which is used to hold to explosion image on the screen for the set period of time
+    static int animationFrame = 0;
+
+    //this is the co-ordinates of the explosion image on the sprite sheet
+    SDL_Rect boom;
+    boom.x=0;
+    boom.y=0;
+    boom.w=125;
+    boom.h=83;
+
+    //these for loop are used to cycle through all the invaders so they all are able to explode
+    for(int r=0; r<ROWS; r++)
+    {
+      for(int c=0; c<COLS; c++)
+      {
+        if (invaders[r][c].kill == 1)
+        {
+          destroy.x=invaders[r][c].pos.x;
+          destroy.y=invaders[r][c].pos.y;
+          SDL_RenderCopy(ren, tex, &boom, &destroy);
+          animationFrame++;
+          if (animationFrame == 10)
+          {
+              animationFrame = 0;
+              invaders[r][c].kill = 0;
+          }
+      }
+
+      }
+    }
+}
+
+
+/*
+    static int animationTime = 0;
+
+    animationTime++;
+
+    for(int c = 0; c< COLS;  c++)
+    {
+      for(int r = 0; r < ROWS; r++)
+      {
+    if(animationTime == ANIMATIONLENGTH)
+    {
+        if(invaders[r][c].frame == 2)
+        {
+          SrcRT1.x=240;
+          SrcRT2.x=240;
+          SrcRT3.x=240;
+          SrcRT1.y=240;
+          SrcRT2.y=240;
+          SrcRT3.y=240;
+        }
+
+       }
+     }
+
+
+
+      //assigns the invaders rows and colums to diffrent animations
+      //and allows them to be sotred on either frame 0 or 1
+      invaders[r][c].frame = (invaders[r][c].frame == 2);
+      rowCount++;
+      //checks every invader on the screen then sets the value to 0 to restart
+      if (rowCount == 55)
+      {
+        frameTime = 0;
+        rowCount = 0;
+      }
+    }
+    //runs the animaton from the spritesheet if frame 0
+    if(invaders[r][c].frame == 2)
+    {
+      boom.x=0;
+
+    }
+    */
+
+/*
+ *
+
+
+
+
 
 
 
