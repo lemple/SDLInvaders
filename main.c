@@ -325,12 +325,22 @@ void updateInvaders(Invader invaders[ROWS][COLS])
             halt = 1;
             break;
         }
+
+        if(activeCR == 0)
+                {
+            printf("feef");
+                    initializeInvaders(invaders);
+                    activeCR = COLS -1;
+                    activeCL = 0;
+        }
       }
+    //stops the invaders from going off the screen and keeps them in place
       if(halt)
       {
          break;
       }
   }
+
 halt = 0;
 
 for(int r = 0; r < ROWS; r++)
@@ -343,9 +353,16 @@ for(int r = 0; r < ROWS; r++)
       halt = 1;
       break;
     }
+    if(activeCL == 11)
+        {
+        printf("ewdf");
+            initializeInvaders(invaders);
+            activeCL = 0;
+            activeCR = COLS -1;
+    }
   }
   if(halt)
-  {
+  { 
     break;
   }
 }
@@ -398,7 +415,7 @@ void ProjectileShot(SDL_Renderer *ren, SDL_Texture *tex, SDL_Rect *projectile, D
 
     if(defender->isFiring == 1)
     {
-      projectile->y -=10;
+      projectile->y -=30;
 
       SDL_RenderFillRect(ren, projectile);
       SDL_RenderCopy(ren, tex, &projectileSprite, projectile);
@@ -571,8 +588,8 @@ void InvaderDestoryAnimation(SDL_Renderer *ren, SDL_Texture *tex, SDL_Rect destr
     }
     */
 
-/*
- *
+
+
 
 
 
