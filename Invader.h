@@ -6,8 +6,8 @@
 
 enum InvaderType{TYPE1,TYPE2,TYPE3};
 
-#define SPRITEWIDTH 30
-#define SPRITEHEIGHT 30
+#define SPRITEWIDTH 35
+#define SPRITEHEIGHT 35
 #define COLS 11
 #define ROWS 5
 #define GAP 10
@@ -19,9 +19,11 @@ typedef struct
   int active;
   //used to set animation frame
   int frame;
+  int kill;
   //type1 type2 type3 invader
   enum InvaderType type;
-
+//This varible here swaps between if the player is firing or not.
+//I use the already made struct to hold the value
   int isFiring;
 }Invader;
 
